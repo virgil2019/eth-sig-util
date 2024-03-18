@@ -1864,6 +1864,304 @@ describe('TypedDataUtils.hashStruct', function () {
       ).toMatchSnapshot();
     });
 
+    it('should hash data with custom type22222222222222', function () {
+      const types = {
+        EIP712Domain: [
+          { name: 'name', type: 'string' },
+          { name: 'version', type: 'string' },
+          { name: 'chainId', type: 'uint256' },
+          { name: 'verifyingContract', type: 'address' },
+        ],
+        Person: [
+          { name: 'name', type: 'string' },
+          { name: 'wallet', type: 'address' },
+        ],
+        Mail: [
+          { name: 'from', type: 'Person[]' },
+          { name: 'to', type: 'Person[]' },
+          { name: 'contents', type: 'string' },
+        ],
+      };
+      const primaryType = 'Mail';
+      const domain = {
+        // This defines the network, in this case, Mainnet.
+        chainId: 1,
+        // Give a user-friendly name to the specific contract you're signing for.
+        name: 'Ether Mail',
+        // Add a verifying contract to make sure you're establishing contracts with the proper entity.
+        verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
+        // This identifies the latest version.
+        version: '1',
+      };
+      const message = {
+        from: [{
+          name: 'Cow',
+          wallet: '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
+        },{
+          name: 'Cow',
+          wallet: '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
+        }],
+        to: [{
+          name: 'Bob',
+          wallet: '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
+        }, {
+          name: 'Bob',
+          wallet: '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
+        }],
+        contents: 'Hello, Bob!',
+      };
+
+      console.log('++++++++',
+        TypedDataUtils.eip712Hash(
+          {
+            types,
+            primaryType,
+            domain,
+            message,
+          },
+          SignTypedDataVersion.V4,
+        ).toString('hex'));
+    });
+
+    it('should hash deploy data', function () {
+      const types = {
+        // This refers to the domain the contract is hosted on.
+        EIP712Domain: [
+          { name: 'name', type: 'string' },
+          { name: 'version', type: 'string' },
+          { name: 'chainId', type: 'uint256' },
+          { name: 'verifyingContract', type: 'address' },
+        ],
+        Deploy: [
+          { name: 'metadata', type: 'DeployMetadata' },
+          { name: 'fee_inputs', type: 'Input[]' },
+          { name: 'fee_outputs', type: 'Output[]' }
+        ],
+        OmniverseUTXO: [
+          { name: 'tx_type', type: 'string' },
+          { name: 'detail', type: 'Deploy' }
+        ],
+        DeployMetadata: [
+          { name: 'salt', type: 'bytes8' },
+          { name: 'name', type: 'string' },
+          { name: 'deployer', type: 'bytes32' },
+          { name: 'limit', type: 'uint128' },
+          { name: 'price', type: 'uint128' },
+          { name: 'total_supply', type: 'uint128' }
+        ],
+        Input: [
+          { name: 'txid', type: 'bytes32' },
+          { name: 'index', type: 'uint32' },
+          { name: 'amount', type: 'uint128' },
+          { name: 'address', type: 'bytes32' }
+        ],
+        Output: [
+          { name: 'amount', type: 'uint128' },
+          { name: 'address', type: 'bytes32' }
+        ]
+      };
+      const primaryType = 'OmniverseUTXO';
+      const domain = {
+        // This defines the network, in this case, Mainnet.
+        chainId: 1,
+        // Give a user-friendly name to the specific contract you're signing for.
+        name: 'Omniverse Transaction',
+        // Add a verifying contract to make sure you're establishing contracts with the proper entity.
+        verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
+        // This identifies the latest version.
+        version: '1',
+      };
+      const message = {
+        tx_type: 'Deploy',
+        detail: {
+          metadata: {
+            salt: "0x1122334455667788",
+            name: "test_token",
+            deployer: "0x1122334455667788112233445566778811223344556677881122334455667788",
+            limit: "1234605616436508552",
+            price: "1234605616436508552",
+            total_supply: "1234605616436508552"
+          },
+          fee_inputs: [{
+            txid: "0x1122334455667788112233445566778811223344556677881122334455667788",
+            index: "287454020",
+            amount: "1234605616436508552",
+            address: "0x1122334455667788112233445566778811223344556677881122334455667788"
+          }],
+          fee_outputs: [{
+            address: "0x1122334455667788112233445566778811223344556677881122334455667788",
+            amount: "1234605616436508552"
+          }]
+        }
+      };
+
+      console.log('Deploy hash',
+        TypedDataUtils.eip712Hash(
+          {
+            types,
+            primaryType,
+            domain,
+            message,
+          },
+          SignTypedDataVersion.V4,
+        ));
+    });
+
+    it('should hash mint data', function () {
+      const types = {
+        // This refers to the domain the contract is hosted on.
+        EIP712Domain: [
+          { name: 'name', type: 'string' },
+          { name: 'version', type: 'string' },
+          { name: 'chainId', type: 'uint256' },
+          { name: 'verifyingContract', type: 'address' },
+        ],
+        Mint: [
+          { name: 'asset_id', type: 'bytes32' },
+          { name: 'outputs', type: 'Output[]' },
+          { name: 'fee_inputs', type: 'Input[]' },
+          { name: 'fee_outputs', type: 'Output[]' }
+        ],
+        OmniverseUTXO: [
+          { name: 'tx_type', type: 'string' },
+          { name: 'detail', type: 'Mint' }
+        ],
+        Input: [
+          { name: 'txid', type: 'bytes32' },
+          { name: 'index', type: 'uint32' },
+          { name: 'amount', type: 'uint128' },
+          { name: 'address', type: 'bytes32' }
+        ],
+        Output: [
+          { name: 'amount', type: 'uint128' },
+          { name: 'address', type: 'bytes32' }
+        ]
+      };
+      const primaryType = 'OmniverseUTXO';
+      const domain = {
+        // This defines the network, in this case, Mainnet.
+        chainId: 1,
+        // Give a user-friendly name to the specific contract you're signing for.
+        name: 'Omniverse Transaction',
+        // Add a verifying contract to make sure you're establishing contracts with the proper entity.
+        verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
+        // This identifies the latest version.
+        version: '1',
+      };
+      const message = {
+        tx_type: 'Mint',
+        detail: {
+          asset_id: '0x1122334455667788112233445566778811223344556677881122334455667788',
+          outputs: [{
+            address: "0x1122334455667788112233445566778811223344556677881122334455667788",
+            amount: "1234605616436508552"
+          }],
+          fee_inputs: [{
+            txid: "0x1122334455667788112233445566778811223344556677881122334455667788",
+            index: "287454020",
+            amount: "1234605616436508552",
+            address: "0x1122334455667788112233445566778811223344556677881122334455667788"
+          }],
+          fee_outputs: [{
+            address: "0x1122334455667788112233445566778811223344556677881122334455667788",
+            amount: "1234605616436508552"
+          }]
+        }
+      };
+
+      console.log('Mint hash',
+        TypedDataUtils.eip712Hash(
+          {
+            types,
+            primaryType,
+            domain,
+            message,
+          },
+          SignTypedDataVersion.V4,
+        ));
+    });
+
+    it('should hash transfer data', function () {
+      const types = {
+        // This refers to the domain the contract is hosted on.
+        EIP712Domain: [
+          { name: 'name', type: 'string' },
+          { name: 'version', type: 'string' },
+          { name: 'chainId', type: 'uint256' },
+          { name: 'verifyingContract', type: 'address' },
+        ],
+        Transfer: [
+          { name: 'asset_id', type: 'bytes32' },
+          { name: 'inputs', type: 'Input[]' },
+          { name: 'outputs', type: 'Output[]' },
+          { name: 'fee_inputs', type: 'Input[]' },
+          { name: 'fee_outputs', type: 'Output[]' }
+        ],
+        OmniverseUTXO: [
+          { name: 'tx_type', type: 'string' },
+          { name: 'detail', type: 'Transfer' }
+        ],
+        Input: [
+          { name: 'txid', type: 'bytes32' },
+          { name: 'index', type: 'uint32' },
+          { name: 'amount', type: 'uint128' },
+          { name: 'address', type: 'bytes32' }
+        ],
+        Output: [
+          { name: 'amount', type: 'uint128' },
+          { name: 'address', type: 'bytes32' }
+        ]
+      };
+      const primaryType = 'OmniverseUTXO';
+      const domain = {
+        // This defines the network, in this case, Mainnet.
+        chainId: 1,
+        // Give a user-friendly name to the specific contract you're signing for.
+        name: 'Omniverse Transaction',
+        // Add a verifying contract to make sure you're establishing contracts with the proper entity.
+        verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
+        // This identifies the latest version.
+        version: '1',
+      };
+      const message = {
+        tx_type: 'Transfer',
+        detail: {
+          asset_id: '0x1122334455667788112233445566778811223344556677881122334455667788',
+          inputs: [{
+            txid: "0x1122334455667788112233445566778811223344556677881122334455667788",
+            index: "287454020",
+            amount: "1234605616436508552",
+            address: "0x1122334455667788112233445566778811223344556677881122334455667788"
+          }],
+          outputs: [{
+            address: "0x1122334455667788112233445566778811223344556677881122334455667788",
+            amount: "1234605616436508552"
+          }],
+          fee_inputs: [{
+            txid: "0x1122334455667788112233445566778811223344556677881122334455667788",
+            index: "287454020",
+            amount: "1234605616436508552",
+            address: "0x1122334455667788112233445566778811223344556677881122334455667788"
+          }],
+          fee_outputs: [{
+            address: "0x1122334455667788112233445566778811223344556677881122334455667788",
+            amount: "1234605616436508552"
+          }]
+        }
+      };
+
+      console.log('Transfer hash',
+        TypedDataUtils.eip712Hash(
+          {
+            types,
+            primaryType,
+            domain,
+            message,
+          },
+          SignTypedDataVersion.V4,
+        ));
+    });
+
     it('should hash data with a recursive data type', function () {
       const types = {
         Person: [
